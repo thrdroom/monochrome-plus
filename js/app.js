@@ -424,20 +424,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     authManager.updateUI(authManager.user);
 
     const enforceAuthLock = () => {
-        const onAccountPage = window.location.pathname === '/account' || window.location.pathname === '/account/';
+        // Authentication disabled via AUTH_ENABLED=false
+        if (window.__AUTH_GATE__ !== true) {
+            document.body.classList.remove('auth-locked');
+            return true;
+        }
+    
+        const onAccountPage = window.location.pathname === '/account' ||
+            window.location.pathname === '/account/';
         const isAuthenticated = !!authManager.user;
+    
         document.body.classList.toggle('auth-locked', !isAuthenticated);
-
+    
         if (!isAuthenticated && !onAccountPage) {
-            if (window.location.hash && window.location.hash !== '#') {
-                window.history.replaceState({}, '', '/account');
-            } else {
-                navigate('/account');
-            }
+            navigate('/account');
             return false;
         }
+    
         return true;
     };
+
 
     authManager.onAuthStateChanged(() => {
         enforceAuthLock();
